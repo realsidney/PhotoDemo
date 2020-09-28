@@ -7,8 +7,9 @@
 
 import UIKit
 import ProgressHUD
+import PhotosUI
 
-class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class ViewController: UIViewController, PHPickerViewControllerDelegate {
 
     @IBOutlet weak var imageView: UIImageView!
     override func viewDidLoad() {
@@ -20,13 +21,15 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         
     }
     @IBAction func handleTapGesture(_ sender: UITapGestureRecognizer) {
-        let index = arc4random() % 4
-        imageView.image = UIImage(named: "pengyuyan\(index)")
+//        let index = arc4random() % 4
+//        imageView.image = UIImage(named: "pengyuyan\(index)")
+        var config = PHPickerConfiguration()
+        config.selectionLimit = 3
+        config.filter = PHPickerFilter.images
         
-//        let imagePicker = UIImagePickerController()
-//        imagePicker.sourceType = .photoLibrary
-//        imagePicker.delegate = self
-//        self.present(imagePicker, animated: true, completion: nil)
+        let imagePicker = PHPickerViewController(configuration: config)
+        imagePicker.delegate = self
+        self.present(imagePicker, animated: true, completion: nil)
         
     }
     
@@ -49,14 +52,27 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         self.present(alert, animated: true, completion: nil)
     }
     
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
         
-        if let image = info[.originalImage] as? UIImage {
-            imageView.image = image
+        results[0].itemProvider.loadObject(ofClass: UIImage.self) { [self] (object, error) in
+            if let image = object as? UIImage {
+                DispatchQueue.main.async {
+                    imageView.image = image
+                }
+            }
         }
         
         picker.dismiss(animated: true, completion: nil)
     }
+    
+//    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+//
+//        if let image = info[.originalImage] as? UIImage {
+//            imageView.image = image
+//        }
+//
+//        picker.dismiss(animated: true, completion: nil)
+//    }
     
     @objc func imageSaved(image: UIImage!, didFinishSavingWithError error: NSError?, contextInfo: AnyObject?) {
         print("Image Saved")
